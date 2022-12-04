@@ -1,0 +1,12 @@
+version: '3'
+
+# docker compose run --rm lens bash
+services:
+  lens:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lens
+    user: node
+    volumes:
+      - .:/work:cached
