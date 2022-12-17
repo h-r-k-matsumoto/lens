@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  push:
+    branches-ignore:
+      - '**'
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    env:
+      TAG_NAME: ${{  github.ref_name }}
+    strategy:
+      matrix:
+        os: [ macos-latest ]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Version
+        run: |
+            echo "BUILD_VERSION=$(jq -r '.version' package.json)" >> $GITHUB_ENV
+      - name: Build Lens
+        run: |
+          echo "test"
+          env ELECTRON_BUILDER_EXTRA_ARGS="--arm64 --x64 --mac --config.dmg.sign=false" make build
+          ls -la dist/
+        shell: bash
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: | 
+            dist/OpenLens-${{ env.BUILD_VERSION }}*.dmg
+
