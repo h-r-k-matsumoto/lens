@@ -1,6 +1,6 @@
 {
-  "name": "open-lens",
-  "productName": "OpenLens",
+  "name": "open-lens(Customized)",
+  "productName": "OpenLens(Customized)",
   "description": "OpenLens - Open Source IDE for Kubernetes",
   "homepage": "https://github.com/lensapp/lens",
   "version": "6.3.0",
