@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  push:
+    branches-ignore:
+      - '**'
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    env:
+      TAG_NAME: ${{  github.ref_name }}
+    strategy:
+      matrix:
+        os: [ macos-latest ]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Version
+        run: |
+            export PACKAGE_VERSION=$(jq -r '.version' ./packages/open-lens/package.json)
+            export PACKAGE_NAME=$(jq -r '.productName' ./packages/open-lens/package.json)
+            echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
+            echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Build Lens
+        run: |
+          yarn
+          yarn build
+          yarn build:app
+          ls -la ./
+          ls -la ./packages/open-lens/dist/ || true
+          ls -la ./lens/packages/open-lens/dist/ || true
+        shell: bash
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: | 
+            ./packages/open-lens/dist/${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}*.dmg
